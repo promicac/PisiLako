@@ -1,0 +1,32 @@
+<main class="game-shell" (pointerdown)="startMusicAfterInteraction()">
+  <header class="topbar">
+    <div class="brand"><span>✏️</span> Пиши лако</div>
+    <div class="stats">
+      <span>Задатак {{ round }}</span><span class="score">⭐ {{ score }}</span>
+      <button class="sound-toggle" (pointerdown)="$event.stopPropagation()" (click)="toggleMusic()" [attr.aria-label]="musicEnabled ? 'Искључи музику' : 'Укључи музику'" [attr.title]="musicEnabled ? 'Искључи музику' : 'Укључи музику'">{{ musicEnabled ? '🔊' : '🔇' }}</button>
+    </div>
+  </header>
+  <section class="game-card" aria-live="polite">
+    <p class="instruction">Погледај слику и састави реч · {{ current.word.length }} слова</p>
+    <div class="picture" role="img" [attr.aria-label]="current.hint">
+      @if (current.image) { <img [src]="current.image" [alt]="current.word" /> }
+      @else { {{ current.picture }} }
+    </div>
+    <p class="hint">💡 {{ current.hint }}</p>
+    <div class="slots" aria-label="Поља за реч">
+      @for (slot of slots; track $index) { <button class="slot" [class.filled]="slot" [class.correct]="solved" (dragover)="$event.preventDefault()" (drop)="drop($event, $index)" (click)="removeTile($index)" [attr.aria-label]="slot ? 'Слово ' + slot.letter + ', додирни за враћање' : 'Празно поље'">{{ slot?.letter || '' }}</button> }
+    </div>
+    <p class="message" [class.success]="solved">{{ message || 'Превуци или додирни слова' }}</p>
+    <div class="letter-bank" aria-label="Понуђена слова">
+      @for (tile of tiles; track tile.id) { <button class="tile" [class.used]="placedIds.has(tile.id)" [disabled]="placedIds.has(tile.id) || solved" draggable="true" (dragstart)="dragStart($event, tile)" (click)="placeTile(tile)" [attr.aria-label]="'Слово ' + tile.letter">{{ tile.letter }}</button> }
+    </div>
+    <div class="actions">
+      @if (!gameComplete) {
+        <button class="secondary" (click)="resetWord()" [disabled]="solved">↻ Испочетка</button>
+        @if (!solved) { <button class="secondary" (click)="skipRound()">Прескочи →</button> }
+      }
+      @if (solved && !gameComplete) { <button class="primary" (click)="nextRound()">Следећа реч →</button> }
+      @if (gameComplete) { <button class="primary" (click)="restartGame()">Нова игра ↻</button> }
+    </div>
+  </section>
+</main>
